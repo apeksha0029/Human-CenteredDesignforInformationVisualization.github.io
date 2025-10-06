@@ -24,8 +24,8 @@
     th {
       background-color: #f4f4f4;
     }
-    #updatedTime {
-      margin-top: 15px;
+    #updatedTime, #dataTimestamp {
+      margin-top: 8px;
       font-size: 0.95em;
       color: #666;
     }
@@ -33,7 +33,8 @@
 </head>
 <body>
   <h1>🌤️ Singapore Real-time PSI Data</h1>
-  <p id="updatedTime">Loading latest data...</p>
+  <p id="dataTimestamp">Loading data timestamp...</p>
+  <p id="updatedTime">Loading update time...</p>
 
   <table id="psiTable">
     <thead>
@@ -57,15 +58,17 @@
         const data = await response.json();
 
         const readings = data.items[0].readings;
+        const timestamp = data.items[0].timestamp;
         const updateTime = data.items[0].update_timestamp;
 
         const tbody = document.querySelector("#psiTable tbody");
         const updatedTime = document.getElementById("updatedTime");
+        const dataTimestamp = document.getElementById("dataTimestamp");
 
-        // Clear existing rows
+        // Clear existing table rows
         tbody.innerHTML = "";
 
-        // Fill new data
+        // Add new rows for each reading
         for (const [key, value] of Object.entries(readings)) {
           const row = document.createElement("tr");
           row.innerHTML = `
@@ -80,9 +83,13 @@
           tbody.appendChild(row);
         }
 
-        // Update timestamp
-        const time = new Date(updateTime).toLocaleString("en-SG", { timeZone: "Asia/Singapore" });
-        updatedTime.textContent = `Last updated: ${time}`;
+        // Format both timestamps into readable SG time
+        const dataTime = new Date(timestamp).toLocaleString("en-SG", { timeZone: "Asia/Singapore" });
+        const updateDisplayTime = new Date(updateTime).toLocaleString("en-SG", { timeZone: "Asia/Singapore" });
+
+        // Update display
+        dataTimestamp.textContent = `📅 Data recorded at: ${dataTime}`;
+        updatedTime.textContent = `🔄 Data last updated at: ${updateDisplayTime}`;
 
       } catch (error) {
         console.error("Error fetching PSI data:", error);
@@ -93,7 +100,7 @@
     // Initial load
     loadPSIData();
 
-    // 🔁 Optional auto-refresh every 5 minutes
+    // 🔁 Auto-refresh every 5 minutes
     setInterval(loadPSIData, 5 * 60 * 1000);
   </script>
 </body>
